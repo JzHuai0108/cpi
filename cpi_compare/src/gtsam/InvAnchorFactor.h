@@ -46,6 +46,8 @@ namespace gtsam {
      * NOTE: anchor only needs to link to the feature node
      */
     class InvAnchorFactor : public NoiseModelFactor1<Point3> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     private:
 
         Eigen::Vector2d uv; ///< normalized uv coordinates

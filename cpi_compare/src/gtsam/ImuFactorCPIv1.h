@@ -53,6 +53,8 @@ namespace gtsam {
      * Links two full JPL Navigation States with an IMU preintegrated measurement
      */
     class ImuFactorCPIv1 : public NoiseModelFactor2<JPLNavState, JPLNavState> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     private:
 
         Vector3 alpha; ///< preintegration measurement due to position

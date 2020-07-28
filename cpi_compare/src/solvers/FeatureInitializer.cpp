@@ -210,7 +210,8 @@ bool FeatureInitializer::triangulate_feature(feature& feat) {
 /**
  * Computes error for a single step of the gauss newton
  */
-double FeatureInitializer::compute_stereo_error(std::vector<Eigen::Matrix<double,2,1>  > uv_vec,std::vector<int> cam_id, std::vector<int> cam_index, Eigen::MatrixXd rel_pose_vec, double alpha, double beta, double rho){
+double FeatureInitializer::compute_stereo_error(std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> uv_vec,
+std::vector<int> cam_id, std::vector<int> cam_index, Eigen::MatrixXd rel_pose_vec, double alpha, double beta, double rho){
     // Calculate the transform from the LEFT to RIGHT cameras
     Eigen::Matrix<double,3,3> R_LtoR = config->R_C1toI.transpose()*config->R_C0toI;
     Eigen::Matrix<double,3,1> p_RinL = config->p_IinC0 - R_LtoR.transpose()*config->p_IinC1;
@@ -247,7 +248,7 @@ bool FeatureInitializer::optimize_feature(feature& feat) {
 
 
     // Convert into Kevin's data format
-    std::vector<Eigen::Matrix<double,2,1>> uv_vec;
+    std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> uv_vec;
     std::vector<int> cam_id;
     std::vector<int> cam_index;
 

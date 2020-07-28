@@ -44,6 +44,8 @@ namespace gtsam {
      * Links a JPl NavState and a 3D feature in the environment
      */
     class JPLImageUVFactor : public NoiseModelFactor2<JPLNavState, Point3> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     private:
 
         Eigen::Vector2d uv; ///< normalized uv coordinates

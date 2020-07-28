@@ -74,8 +74,8 @@ void GraphSolver::addmeasurement_imu(double timestamp, Eigen::Vector3d linacc, E
  * The planes are seen in the LIDAR frame at the given timestep.
  * We first create a preintegrated measurement up to this time, which we can then insert into the graph.
  */
-void GraphSolver::addmeasurement_uv(double timestamp, std::vector<uint> leftids, std::vector<Eigen::Vector2d> leftuv,
-                                    std::vector<uint> rightids, std::vector<Eigen::Vector2d> rightuv) {
+void GraphSolver::addmeasurement_uv(double timestamp, std::vector<uint> leftids, std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> leftuv,
+                                    std::vector<uint> rightids, std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> rightuv) {
 
     // Return if we don't actually have any plane measurements
     if(leftids.empty() || rightids.empty())
@@ -99,8 +99,8 @@ void GraphSolver::addmeasurement_uv(double timestamp, std::vector<uint> leftids,
 
         // Store our IMU messages as they get deleted during propagation
         std::deque<double> imu_timestemp(imu_times);
-        std::deque<Eigen::Vector3d> imu_linaccstemp(imu_linaccs);
-        std::deque<Eigen::Vector3d> imu_angveltemp(imu_angvel);
+        std::deque<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> imu_linaccstemp(imu_linaccs);
+        std::deque<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> imu_angveltemp(imu_angvel);
 
         //==========================================================================
         // PREINTEGRATION IMU FACTORS
@@ -145,12 +145,15 @@ void GraphSolver::addmeasurement_uv(double timestamp, std::vector<uint> leftids,
         JPLNavState newstateMODEL1 = getpredictedstate_v1(imuFactorMODEL1, values_initialMODEL1);
         JPLNavState newstateMODEL2 = getpredictedstate_v2(imuFactorMODEL2, values_initialMODEL2);
         JPLNavState newstateFORSTER = getpredictedstate_v1(imuFactorFORSTER, values_initialFORSTER);
+        newstateMODEL2.q_GtoI = true_qGtoI.at(true_qGtoI.size()-1);
+        newstateMODEL2.p_IinG = true_pIinG.at(true_pIinG.size()-1);
 
         // Move node count forward in time
         ct_state++;
 
         // Append to our node vectors
         values_newMODEL1.insert(X(ct_state), newstateMODEL1);
+        ROS_INFO_STREAM("Adding to model2 key " << gtsam::DefaultKeyFormatter(X(ct_state)));
         values_newMODEL2.insert(X(ct_state), newstateMODEL2);
         values_newFORSTER.insert(X(ct_state), newstateFORSTER);
         values_initialMODEL1.insert(X(ct_state), newstateMODEL1);
@@ -246,6 +249,31 @@ void GraphSolver::optimize() {
     boost::posix_time::ptime t2(boost::posix_time::microsec_clock::local_time());
     ROS_INFO("[GRAPH]: %d states | %d features | %d edges [%.5f seconds to optimize]",(int)ct_state+1,(int)ct_features,(int)graph_newMODEL1->size(),(t2-t1).total_microseconds()*1e-6);
 
+}
+
+
+Eigen::MatrixXd GraphSolver::getCurrentCovariance() const {
+    // Return if not initialized
+    Eigen::MatrixXd cov;
+    if(!systeminitalized && ct_state < 2)
+        return cov;
+
+    // Start our timer
+    boost::posix_time::ptime t1(boost::posix_time::microsec_clock::local_time());
+
+    try {
+        cov = smootherBatchMODEL2->marginalCovariance(X(ct_state));
+    } catch(gtsam::IndeterminantLinearSystemException &e) {
+        ROS_ERROR("CPI MODEL 1 gtsam indeterminate linear system exception in gettting covariance!");
+        cerr << e.what() << endl;
+        exit(EXIT_FAILURE);
+    }
+    
+    // Debug print time
+    boost::posix_time::ptime t2(boost::posix_time::microsec_clock::local_time());
+    ROS_INFO("[GRAPH]: %d states | %d features | %d edges [%.5f seconds to compute covariance]",
+        (int)ct_state+1,(int)ct_features,(int)graph_newMODEL1->size(),(t2-t1).total_microseconds()*1e-6);
+    return cov;
 }
 
 

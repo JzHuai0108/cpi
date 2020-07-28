@@ -39,7 +39,8 @@
  * http://udel.edu/~ghuang/papers/tr_cpi.pdf
  */
 class CpiV2: public CpiBase {
-
+public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 private:
 
     // Extended covariance used to handle the sampling model

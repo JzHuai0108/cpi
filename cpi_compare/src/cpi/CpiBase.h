@@ -40,7 +40,7 @@
 class CpiBase {
 
 public:
-
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     /**
      * Default constructor

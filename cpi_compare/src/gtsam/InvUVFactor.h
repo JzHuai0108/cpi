@@ -45,6 +45,8 @@ namespace gtsam {
      * This is an inverse depth representation
      */
     class InvUVFactor : public NoiseModelFactor3<JPLNavState, JPLNavState, Point3> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     private:
 
         Eigen::Vector2d uv; ///< normalized uv coordinates

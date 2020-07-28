@@ -36,7 +36,7 @@ using namespace std;
 class feature {
 
 public:
-
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     /// Default constructor
     feature(){}
 
@@ -57,8 +57,8 @@ public:
     std::vector<size_t> rightstateids;
 
     /// UV coordinates of the features
-    std::vector<Eigen::Vector2d> leftuv;
-    std::vector<Eigen::Vector2d> rightuv;
+    std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> leftuv;
+    std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> rightuv;
 
     /// Simulation IDs used for matching of features (theses should all be the same)
     std::vector<uint> leftids;

@@ -53,7 +53,7 @@ using gtsam::symbol_shorthand::F; // F: our feature node
 
 class FeatureInitializer {
 public:
-
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     /**
      * Default constructor
      * Will create the camera pose vector
@@ -98,7 +98,9 @@ private:
     bool optimize_feature(feature& feat);
 
     /// Helper function that computes the error for a single gauss newton step
-    double compute_stereo_error(std::vector<Eigen::Matrix<double,2,1>  > uv_vec,std::vector<int> cam_id, std::vector<int> cam_index, Eigen::MatrixXd rel_pose_vec, double alpha, double beta, double rho);
+    double compute_stereo_error(std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> uv_vec,
+    std::vector<int> cam_id, std::vector<int> cam_index, Eigen::MatrixXd rel_pose_vec,
+     double alpha, double beta, double rho);
 
 
 };

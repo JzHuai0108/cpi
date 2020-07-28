@@ -325,9 +325,9 @@ void handle_measurement_uv(cpi_comm::CameraMeasurement::Ptr msg) {
 
     // Our feature measurements
     std::vector<uint> leftids;
-    std::vector<Eigen::Vector2d> leftuv;
+    std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> leftuv;
     std::vector<uint> rightids;
-    std::vector<Eigen::Vector2d> rightuv;
+    std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> rightuv;
 
     // Loop through LEFT features and append
     for(size_t i=0; i<msg->features_left.size(); i++) {
@@ -361,11 +361,15 @@ void handle_measurement_uv(cpi_comm::CameraMeasurement::Ptr msg) {
     //==========================================================================
 
     // Temp empty covariance, since this takes a while to compute
-    Eigen::Matrix<double, 6, 6> covariance = Eigen::Matrix<double,6,6>::Zero();
+    Eigen::Matrix<double, 6, 6> covariance = Eigen::Matrix<double, 6, 6>::Zero();
 
     // CPI MODEL 1
     JPLNavState state = graphsolver->getcurrentstateMODEL1();
+    ROS_INFO("model 1 compute covariance");
+    // Eigen::MatrixXd cov = graphsolver->getCurrentCovariance();
+    ROS_INFO_STREAM("model covariance\n" << covariance.diagonal().cwiseSqrt().transpose());
     publish_JPLstate(msg->header.stamp.toSec(),state,covariance,pubPathMODEL1,pubPoseIMUMODEL1,poses_estMODEL1);
+    covariance.setZero();
 
     // CPI MODEL 2
     state = graphsolver->getcurrentstateMODEL2();
@@ -483,7 +487,7 @@ void publish_FeatureCloud(double timestamp) {
         return;
 
     // Loop through and create a cloud
-    std::vector<Eigen::Vector3d> points = graphsolver->getcurrentfeaturesMODEL1();
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> points = graphsolver->getcurrentfeaturesMODEL1();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud <pcl::PointXYZ>);
     for(size_t i=0; i<points.size(); i++) {
         pcl::PointXYZ pt;
@@ -492,7 +496,7 @@ void publish_FeatureCloud(double timestamp) {
         pt.z = points.at(i)(2);
         cloud->push_back(pt);
     }
-    std::vector<Eigen::Vector3d> points2 = graphsolver->getcurrentfeaturesMODEL2();
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> points2 = graphsolver->getcurrentfeaturesMODEL2();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud2(new pcl::PointCloud <pcl::PointXYZ>);
     for(size_t i=0; i<points2.size(); i++) {
         pcl::PointXYZ pt;
@@ -502,7 +506,7 @@ void publish_FeatureCloud(double timestamp) {
         cloud2->push_back(pt);
     }
 
-    std::vector<Eigen::Vector3d> points3 = graphsolver->getcurrentfeaturesFORSTER();
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> points3 = graphsolver->getcurrentfeaturesFORSTER();
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud3(new pcl::PointCloud <pcl::PointXYZ>);
     for(size_t i=0; i<points2.size(); i++) {
         pcl::PointXYZ pt;

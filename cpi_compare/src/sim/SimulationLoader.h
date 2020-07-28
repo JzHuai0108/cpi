@@ -55,7 +55,7 @@ using namespace std;
 
 class SimulationLoader {
 public:
-
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     /**
      * Default constructor
      * Will load all our data from file

@@ -83,5 +83,23 @@ Find this useful? Cite us with:
 }
 ```
 
+## Build log
+I successfully built cpi with gtsam from bitbucket, tbb and mkl, in ubuntu 16.04, as instructed above.
+The demos work well. Then I replaced BatchFixedLagSmoother with IncrementalFixedLagSmoother, 
+the estimated trajectory diverged after a couple of seconds, and then the error 
+"Requested variable x18 is not in this VectorValues." comes up. 
+The error persisted even when I used true poses in place of propagated poses.
+As I suspected this is a bug in old gtsam versions, I upgraded gtsam to the version at github with commit ee069286b447ff58b809423cc77c777a02abdfe5, then built it with command
+```
+cmake -DGTSAM_TANGENT_PREINTEGRATION=OFF -DCMAKE_INSTALL_PREFIX="/jhuai/baselines/gtsam/install"  -DGTSAM_USE_EIGEN_MKL=ON .. 
+make -j6 install
+``` 
+Then replaced cpi/cpi_compare/external/Eigen with gtsam/gtsam/3rdparty/Eigen/Eigen, and built cpi with
+```
+catkin build cpi_compare -DGTSAM_DIR="/jhuai/baselines/gtsam/install/lib/cmake/GTSAM/"
+```
+In running the demos, Eigen complained about the alignment issue, and directed me to "http://eigen.tuxfamily.org/dox-devel/group__TopicUnalignedArrayAssert.html".
+So I added EIGEN_MAKE_ALIGNED_OPERATOR_NEW and rewrote containers with Eigen allocators.
+Still the error persisted so I quit dealing with CPI.
 
 

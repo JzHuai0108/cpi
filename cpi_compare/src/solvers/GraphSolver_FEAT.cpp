@@ -33,8 +33,8 @@
  * This will add normal UV factors with the feature being represented as a 3D position
  * This might have some instabilities depending on the feature layout in the simulation
  */
-void GraphSolver::process_feat_normal(double timestamp, std::vector<uint> leftids, std::vector<Eigen::Vector2d> leftuv,
-                                      std::vector<uint> rightids, std::vector<Eigen::Vector2d> rightuv) {
+void GraphSolver::process_feat_normal(double timestamp, std::vector<uint> leftids, std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> leftuv,
+                                      std::vector<uint> rightids, std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> rightuv) {
 
     //==============================================================================
     // Loop through LEFT features
@@ -240,8 +240,8 @@ void GraphSolver::process_feat_normal(double timestamp, std::vector<uint> leftid
  * This will add all factors, such that we are using inverse depth for features!
  * Each inverse feature has a anchor node, and then all measurements will relate to this anchor
  */
-void GraphSolver::process_feat_inverse(double timestamp, std::vector<uint> leftids, std::vector<Eigen::Vector2d> leftuv,
-                                       std::vector<uint> rightids, std::vector<Eigen::Vector2d> rightuv) {
+void GraphSolver::process_feat_inverse(double timestamp, std::vector<uint> leftids, std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> leftuv,
+                                       std::vector<uint> rightids, std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> rightuv) {
 
 
     //==============================================================================

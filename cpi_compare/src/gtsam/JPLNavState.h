@@ -57,8 +57,8 @@ namespace gtsam {
      * Contains orientation, position, velocity, and biases
      */
     class JPLNavState {
-    private:
-
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         JPLQuaternion q_GtoI; ///< Rotation from global to IMU
         Bias3 biasg; ///< Bias of the gyroscope
         Velocity3 v_IinG; ///< Velocity of IMU in global

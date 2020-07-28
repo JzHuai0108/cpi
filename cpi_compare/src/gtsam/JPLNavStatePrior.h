@@ -61,6 +61,8 @@ namespace gtsam {
      * Our initial state at initialization
      */
     class JPLNavStatePrior : public NoiseModelFactor1<JPLNavState> {
+    public:
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     private:
 
         JPLQuaternion q_GtoI; ///< Rotation from global to IMU

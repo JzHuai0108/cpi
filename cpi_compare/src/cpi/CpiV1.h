@@ -41,7 +41,7 @@
 class CpiV1: public CpiBase {
 
 public:
-
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     /**
      * Default constructor for our Model 1 preintegration (piecewise constant measurement assumption)

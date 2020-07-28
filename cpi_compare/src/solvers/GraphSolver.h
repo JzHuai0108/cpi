@@ -74,7 +74,7 @@ using gtsam::symbol_shorthand::F; // F: our feature node
 
 class GraphSolver {
 public:
-
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     /**
      * Default constructor
@@ -92,9 +92,11 @@ public:
         // Fixed lag smoothers BATCH
         gtsam::LevenbergMarquardtParams params;
         params.setVerbosity("ERROR"); // SILENT, TERMINATION, ERROR, VALUES, DELTA, LINEAR
-        this->smootherBatchMODEL1 = new BatchFixedLagSmoother(config->lagSmootherAmount,params,true);
-        this->smootherBatchMODEL2 = new BatchFixedLagSmoother(config->lagSmootherAmount,params,true);
-        this->smootherBatchFORSTER = new BatchFixedLagSmoother(config->lagSmootherAmount,params,true);
+
+        gtsam::ISAM2Params isam2Params = gtsam::ISAM2Params();
+        this->smootherBatchMODEL1 = new BatchFixedLagSmoother(config->lagSmootherAmount,params, true);
+        this->smootherBatchMODEL2 = new BatchFixedLagSmoother(config->lagSmootherAmount, params, true);
+        this->smootherBatchFORSTER = new BatchFixedLagSmoother(config->lagSmootherAmount, params, true);
 
     }
 
@@ -105,8 +107,8 @@ public:
     void addmeasurement_imu(double timestamp, Eigen::Vector3d linacc, Eigen::Vector3d angvel);
 
     /// Function that takes in UV measurements that will be used as "features" in our graph
-    void addmeasurement_uv(double timestamp, std::vector<uint> leftids, std::vector<Eigen::Vector2d> leftuv,
-                           std::vector<uint> rightids, std::vector<Eigen::Vector2d> rightuv);
+    void addmeasurement_uv(double timestamp, std::vector<uint> leftids, std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> leftuv,
+                           std::vector<uint> rightids, std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> rightuv);
 
     /// This function will optimize the graph
     void optimize();
@@ -123,6 +125,8 @@ public:
         return values_initialMODEL1.at<JPLNavState>(X(ct_state));
     }
 
+    Eigen::MatrixXd getCurrentCovariance() const;
+
     /// This function returns the current nav state, return origin if we have not initialized yet
     JPLNavState getcurrentstateMODEL2() {
         if(values_initialMODEL2.empty())
@@ -138,13 +142,13 @@ public:
     }
 
     /// Returns the currently tracked features
-    std::vector<Eigen::Vector3d> getcurrentfeaturesMODEL1() {
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> getcurrentfeaturesMODEL1() {
         // Return if we do not have any nodes yet
         if(values_initialMODEL1.empty()) {
-            return std::vector<Eigen::Vector3d>();
+            return std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>>();
         }
         // Our vector of points in the global
-        std::vector<Eigen::Vector3d> features;
+        std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> features;
         // Else loop through the features and return them
         for(size_t i=1; i<= ct_features; i++) {
             // Ensure valid feature
@@ -170,13 +174,13 @@ public:
     }
 
     /// Returns the currently tracked features
-    std::vector<Eigen::Vector3d> getcurrentfeaturesMODEL2() {
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> getcurrentfeaturesMODEL2() {
         // Return if we do not have any nodes yet
         if(values_initialMODEL2.empty()) {
-            return std::vector<Eigen::Vector3d>();
+            return std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>>();
         }
         // Our vector of points in the global
-        std::vector<Eigen::Vector3d> features;
+        std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> features;
         // Else loop through the features and return them
         for(size_t i=1; i<= ct_features; i++) {
             // Ensure valid feature
@@ -202,13 +206,13 @@ public:
     }
 
     /// Returns the currently tracked features
-    std::vector<Eigen::Vector3d> getcurrentfeaturesFORSTER() {
+    std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> getcurrentfeaturesFORSTER() {
         // Return if we do not have any nodes yet
         if(values_initialFORSTER.empty()) {
-            return std::vector<Eigen::Vector3d>();
+            return std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>>();
         }
         // Our vector of points in the global
-        std::vector<Eigen::Vector3d> features;
+        std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> features;
         // Else loop through the features and return them
         for(size_t i=1; i<= ct_features; i++) {
             // Ensure valid feature
@@ -255,12 +259,12 @@ private:
     void swapcovariance(Eigen::Matrix<double,15,15>& covariance, int coli, int colj);
 
     /// Normal feature measurements
-    void process_feat_normal(double timestamp, std::vector<uint> leftids, std::vector<Eigen::Vector2d> leftuv,
-                             std::vector<uint> rightids, std::vector<Eigen::Vector2d> rightuv);
+    void process_feat_normal(double timestamp, std::vector<uint> leftids, std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> leftuv,
+                             std::vector<uint> rightids, std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> rightuv);
 
     /// Inverse feature measurements
-    void process_feat_inverse(double timestamp, std::vector<uint> leftids, std::vector<Eigen::Vector2d> leftuv,
-                              std::vector<uint> rightids, std::vector<Eigen::Vector2d> rightuv);
+    void process_feat_inverse(double timestamp, std::vector<uint> leftids, std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> leftuv,
+                              std::vector<uint> rightids, std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> rightuv);
 
 
 
@@ -315,14 +319,14 @@ private:
     // Our true POSE data
     std::mutex truth_mutex;
     std::deque<double> true_times;
-    std::deque<Eigen::Vector4d> true_qGtoI;
-    std::deque<Eigen::Vector3d> true_pIinG;
+    std::deque<Eigen::Vector4d, Eigen::aligned_allocator<Eigen::Vector4d>> true_qGtoI;
+    std::deque<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> true_pIinG;
 
     // Our IMU data from the sensor
     std::mutex imu_mutex;
     std::deque<double> imu_times;
-    std::deque<Eigen::Vector3d> imu_linaccs;
-    std::deque<Eigen::Vector3d> imu_angvel;
+    std::deque<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> imu_linaccs;
+    std::deque<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d>> imu_angvel;
 
     /// Lookup tables for features and incoming measurements
     std::mutex features_mutex;

@@ -203,8 +203,8 @@ public:
 
         std::vector<uint> idsleft;
         std::vector<uint> idsright;
-        std::vector<Eigen::Vector2d> measleft;
-        std::vector<Eigen::Vector2d> measright;
+        std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> measleft;
+        std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> measright;
 
         // Loop variables
         std::istringstream sMEAS0(lineMEAS0);
